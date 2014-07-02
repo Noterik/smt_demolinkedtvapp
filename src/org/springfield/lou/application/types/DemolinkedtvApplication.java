@@ -98,6 +98,7 @@ public class DemolinkedtvApplication extends Html5Application {
 		// try to load special style first if not fallback.
 		loadStyleSheet(s,"animate");
 		loadStyleSheet(s,"generic");
+		loadStyleSheet(s, "terms");
 		// Do we already have a screen in the application that claims to be a mainscreen ?
 		if (screenmanager.hasRole("mainscreen") && (fixedrole==null || !fixedrole.equals("mainscreen"))) {
 			System.out.println("Second screen");
@@ -154,9 +155,11 @@ public class DemolinkedtvApplication extends Html5Application {
 		
 		loadContent(s, "video");
 		loadContent(s, "logo");
+		loadContent(s, "terms");
 		
 		this.componentmanager.getComponent("video").put("app", "setVideo("+ presentation.getVideoUri() +"/rawvideo/3/raw.mp4)");
 		this.componentmanager.getComponent("video").put("app", "setPoster("+ presentation.getImageUri() +"/h/0/m/0/sec1.jpg)");
+		s.putMsg("terms", "", "show()");
 		s.putMsg("logo", "", "broadcaster(" +presentation.getUser()+")");
 	}
 	
