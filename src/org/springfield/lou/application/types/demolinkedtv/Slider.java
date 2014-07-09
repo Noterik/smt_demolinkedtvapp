@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springfield.lou.application.types.DemolinkedtvApplication;
-import org.springfield.lou.application.types.SecondscreenApplication;
 import org.springfield.fs.FsNode;
 import org.springfield.fs.FsTimeLine;
 import org.springfield.lou.screen.Screen;
@@ -90,7 +89,7 @@ public class Slider {
 	 * @param slider
 	 * @return
 	 */
-	public static String getBlockData(SecondscreenApplication parent,String content, String slider) {
+	public static String getBlockData(DemolinkedtvApplication parent,String content, String slider) {
 		String orientation = content.split(",")[2];
 		System.out.println("orientation = "+orientation);
 	

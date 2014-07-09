@@ -34,10 +34,7 @@ import org.springfield.lou.application.Html5Application;
 import org.springfield.lou.application.components.BasicComponent;
 import org.springfield.lou.application.components.ComponentInterface;
 import org.springfield.lou.application.types.demolinkedtv.Slider;
-import org.springfield.fs.FSList;
-import org.springfield.fs.FsNode;
-import org.springfield.fs.FsTimeLine;
-import org.springfield.fs.FsTimeTagNodes;
+import org.springfield.fs.*;
 import org.springfield.lou.homer.LazyHomer;
 import org.springfield.lou.screen.Capabilities;
 import org.springfield.lou.screen.Screen;
@@ -45,6 +42,8 @@ import org.springfield.lou.tools.FsFileReader;
 import org.springfield.lou.user.User;
 import org.springfield.mojo.http.HttpHelper;
 import org.springfield.mojo.http.Response;
+import org.springfield.mojo.interfaces.ServiceInterface;
+import org.springfield.mojo.interfaces.ServiceManager;
 import org.springfield.mojo.linkedtv.Channel;
 import org.springfield.mojo.linkedtv.Episode;
 
@@ -842,7 +841,10 @@ final class Presentation {
 	 * @return true if everything went ok, otherwise false
 	 */
 	private boolean loadCollectionPresentation() {
-		String data = LazyHomer.sendRequestBart("GET", uri, null, null);
+		ServiceInterface smithers = ServiceManager.getService("smithers");
+		if (smithers==null) return false;
+		//String data = LazyHomer.sendRequestBart("GET", uri, null, null);
+		String data = smithers.get(uri, null, null);
 		try {
 			Document response = DocumentHelper.parseText(data);
 			String presentationUri = response.selectSingleNode("//presentation/@referid") == null ? "" : response.selectSingleNode("//presentation/@referid").getText();
@@ -861,7 +863,10 @@ final class Presentation {
 	 * @return true if everything went ok, otherwise false
 	 */
 	private boolean loadPresentation() {
-		String data = LazyHomer.sendRequestBart("GET", presentationUri, null, null);
+		ServiceInterface smithers = ServiceManager.getService("smithers");
+		if (smithers==null) return false;
+		//String data = LazyHomer.sendRequestBart("GET", presentationUri, null, null);
+		String data = smithers.get(presentationUri, null, null);
 		try {
 			Document response = DocumentHelper.parseText(data);
 			String videoUri = response.selectSingleNode("//videoplaylist[@id='1']/video[@id='1']/@referid") == null ? "" : response.selectSingleNode("//videoplaylist[@id='1']/video[@id='1']/@referid").getText();
@@ -883,7 +888,10 @@ final class Presentation {
 	 * @return true if everything went ok, otherwise false
 	 */
 	private boolean loadVideo() {
-		String data = LazyHomer.sendRequestBart("GET", videoUri, null, null);
+		ServiceInterface smithers = ServiceManager.getService("smithers");
+		if (smithers==null) return false;
+		//String data = LazyHomer.sendRequestBart("GET", videoUri, null, null);
+		String data = smithers.get(videoUri, null, null);
 		try {
 			Document response = DocumentHelper.parseText(data);
 			String imageUri = response.selectSingleNode("//screens[@id='1']/properties/uri") == null ? "" : response.selectSingleNode("//screens[@id='1']/properties/uri").getText();
