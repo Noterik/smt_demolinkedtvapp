@@ -29,8 +29,8 @@ import java.util.Map;
 
 import org.springfield.lou.application.types.DemolinkedtvApplication;
 import org.springfield.lou.application.types.SecondscreenApplication;
-import org.springfield.lou.fs.FsNode;
-import org.springfield.lou.fs.FsTimeLine;
+import org.springfield.fs.FsNode;
+import org.springfield.fs.FsTimeLine;
 import org.springfield.lou.screen.Screen;
 import org.springfield.lou.user.User;
 import org.springfield.lou.user.UserManager;

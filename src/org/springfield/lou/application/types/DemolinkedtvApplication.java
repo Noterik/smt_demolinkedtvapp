@@ -34,16 +34,19 @@ import org.springfield.lou.application.Html5Application;
 import org.springfield.lou.application.components.BasicComponent;
 import org.springfield.lou.application.components.ComponentInterface;
 import org.springfield.lou.application.types.demolinkedtv.Slider;
-import org.springfield.lou.fs.FsNode;
-import org.springfield.lou.fs.FsTimeLine;
-import org.springfield.lou.fs.FsTimeTagNodes;
+import org.springfield.fs.FSList;
+import org.springfield.fs.FsNode;
+import org.springfield.fs.FsTimeLine;
+import org.springfield.fs.FsTimeTagNodes;
 import org.springfield.lou.homer.LazyHomer;
 import org.springfield.lou.screen.Capabilities;
 import org.springfield.lou.screen.Screen;
 import org.springfield.lou.tools.FsFileReader;
 import org.springfield.lou.user.User;
-
-import com.noterik.springfield.tools.HttpHelper;
+import org.springfield.mojo.http.HttpHelper;
+import org.springfield.mojo.http.Response;
+import org.springfield.mojo.linkedtv.Channel;
+import org.springfield.mojo.linkedtv.Episode;
 
 /**
  * Demo LinkedTV application. The multiscreen application
@@ -137,10 +140,39 @@ public class DemolinkedtvApplication extends Html5Application {
 			if (s.getParameter("curated") != null) {
 				this.curated = true;
 			}
+			
 			System.out.println("Main screen presentation uri = "+this.presentationCollectionUri);
 			s.setRole("mainscreen");
 			loadMainScreen(s);			
 		}
+		
+		if (s.getParameter("id") != null) {
+			Episode e = new Episode(s.getParameter("id"));
+			System.out.println("Title: "+e.getTitle());
+			System.out.println("Duration: "+e.getDuration());
+			System.out.println("Stills uri: "+e.getStillsUri());
+			System.out.println("Stream uri: "+e.getStreamUri());
+			
+			FSList annotations = e.getAnnotations();
+			List<FsNode> locations = annotations.getNodesByName("location");
+			for (FsNode location : locations) {
+				System.out.println("location : "+location.getProperty("title")+"(start: "+location.getProperty("starttime")+" duration: "+location.getProperty("duration")+")");
+			}
+		}
+		if (s.getParameter("provider") != null) {
+			Channel c = new Channel("linkedtv", s.getParameter("provider"));
+			List<Episode> episodes = c.getEpisodes();
+			System.out.println("size of channel: "+episodes.size());
+			
+			Episode e = c.getLatestEpisode();
+			
+			System.out.println("Id: "+e.getMediaResourceId());
+			System.out.println("Title: "+e.getTitle());
+			System.out.println("Duration: "+e.getDuration());
+			System.out.println("Stills uri: "+e.getStillsUri());
+			System.out.println("Stream uri: "+e.getStreamUri());
+		}
+		
 		loadContent(s, "notification");
 	}
 	
@@ -912,7 +944,7 @@ final class FSHelper {
 			uri += "&curated&renew";
 		}
 		
-		String data = HttpHelper.sendRequest("GET", uri, null, null);
+		String data = HttpHelper.sendRequest("GET", uri, null, null).getResponse();
 		System.out.println("data = "+data);
 		try {
 			Document response = DocumentHelper.parseText(data);
@@ -935,7 +967,7 @@ final class FSHelper {
 		} catch (Exception e) {
 			System.out.println("Error in parsing nodes from maggie");
 		}
-		data = HttpHelper.sendRequest("GET", FS_SERVER+"?domain="+domain+"&id="+mediaResourceId+"&chapters", null, null);
+		data = HttpHelper.sendRequest("GET", FS_SERVER+"?domain="+domain+"&id="+mediaResourceId+"&chapters", null, null).getResponse();
 		System.out.println("data from chapters = "+data);
 		try {
 			Document response = DocumentHelper.parseText(data);
@@ -974,7 +1006,7 @@ final class FSHelper {
 	public static List<Element> getEnrichment(String domain, String entityId) {
 		String uri = FS_SERVER+"?domain="+domain+"&id="+entityId+"&enrichments";		
 		System.out.println("Getting enrichment "+entityId+" ("+uri+")");
-		String data = HttpHelper.sendRequest("GET", uri, null, null);
+		String data = HttpHelper.sendRequest("GET", uri, null, null).getResponse();
 		List<Element> results = null;
 		
 		try {
