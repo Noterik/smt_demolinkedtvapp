@@ -34,10 +34,7 @@ import org.springfield.lou.application.Html5Application;
 import org.springfield.lou.application.components.BasicComponent;
 import org.springfield.lou.application.components.ComponentInterface;
 import org.springfield.lou.application.types.demolinkedtv.Slider;
-import org.springfield.fs.FSList;
-import org.springfield.fs.FsNode;
-import org.springfield.fs.FsTimeLine;
-import org.springfield.fs.FsTimeTagNodes;
+import org.springfield.fs.*;
 import org.springfield.lou.homer.LazyHomer;
 import org.springfield.lou.screen.Capabilities;
 import org.springfield.lou.screen.Screen;
@@ -45,6 +42,8 @@ import org.springfield.lou.tools.FsFileReader;
 import org.springfield.lou.user.User;
 import org.springfield.mojo.http.HttpHelper;
 import org.springfield.mojo.http.Response;
+import org.springfield.mojo.interfaces.ServiceInterface;
+import org.springfield.mojo.interfaces.ServiceManager;
 import org.springfield.mojo.linkedtv.Channel;
 import org.springfield.mojo.linkedtv.Episode;
 
@@ -153,14 +152,38 @@ public class DemolinkedtvApplication extends Html5Application {
 			System.out.println("Duration: "+e.getDuration());
 			System.out.println("Stills uri: "+e.getStillsUri());
 			System.out.println("Stream uri: "+e.getStreamUri());
+			System.out.println("Presentation: "+e.getPresentationId());
 			
-			FSList annotations = e.getAnnotations();
-			List<FsNode> locations = annotations.getNodesByName("location");
-			for (FsNode location : locations) {
-				System.out.println("location : "+location.getProperty("title")+"(start: "+location.getProperty("starttime")+" duration: "+location.getProperty("duration")+")");
+			//FSList annotations = e.getAnnotations();
+			//List<FsNode> locations = annotations.getNodesByName("location");
+
+			//get chapters
+			FSList chaptersList = e.getChapters();
+			int size = chaptersList.size();
+			//if we have some chapters
+			System.out.println("Number of chapters: "+size);
+			if (size > 0) {
+				List<FsNode> chapters = chaptersList.getNodes();	
+				for (FsNode chapter : chapters) {					
+					FSList annotationsList = e.getAnnotationsFromChapter(chapter); 
+					List<FsNode> annotations = annotationsList.getNodes();
+										
+					String chapterTitle = chapter.getProperty("title");
+					System.out.println("Chapter title : "+chapterTitle);
+						
+					for (FsNode annotation : annotations) {							
+						System.out.println("annotation : "+annotation.getProperty("title")+"(start: "+annotation.getProperty("starttime")+" duration: "+annotation.getProperty("duration")+")");
+						
+						FSList enrichmentsList = e.getEnrichmentsFromAnnotation(annotation);
+						List<FsNode> enrichments = enrichmentsList.getNodes();
+						for (FsNode enrichment : enrichments) {
+							System.out.println("enrichment : "+enrichment.getProperty("locator"));
+						}						
+					}
+				}
 			}
 		}
-		if (s.getParameter("provider") != null) {
+		/*if (s.getParameter("provider") != null) {
 			Channel c = new Channel("linkedtv", s.getParameter("provider"));
 			List<Episode> episodes = c.getEpisodes();
 			System.out.println("size of channel: "+episodes.size());
@@ -172,7 +195,7 @@ public class DemolinkedtvApplication extends Html5Application {
 			System.out.println("Duration: "+e.getDuration());
 			System.out.println("Stills uri: "+e.getStillsUri());
 			System.out.println("Stream uri: "+e.getStreamUri());
-		}
+		}*/
 		
 		loadContent(s, "notification");
 	}
@@ -842,7 +865,10 @@ final class Presentation {
 	 * @return true if everything went ok, otherwise false
 	 */
 	private boolean loadCollectionPresentation() {
-		String data = LazyHomer.sendRequestBart("GET", uri, null, null);
+		ServiceInterface smithers = ServiceManager.getService("smithers");
+		if (smithers==null) return false;
+		//String data = LazyHomer.sendRequestBart("GET", uri, null, null);
+		String data = smithers.get(uri, null, null);
 		try {
 			Document response = DocumentHelper.parseText(data);
 			String presentationUri = response.selectSingleNode("//presentation/@referid") == null ? "" : response.selectSingleNode("//presentation/@referid").getText();
@@ -861,7 +887,10 @@ final class Presentation {
 	 * @return true if everything went ok, otherwise false
 	 */
 	private boolean loadPresentation() {
-		String data = LazyHomer.sendRequestBart("GET", presentationUri, null, null);
+		ServiceInterface smithers = ServiceManager.getService("smithers");
+		if (smithers==null) return false;
+		//String data = LazyHomer.sendRequestBart("GET", presentationUri, null, null);
+		String data = smithers.get(presentationUri, null, null);
 		try {
 			Document response = DocumentHelper.parseText(data);
 			String videoUri = response.selectSingleNode("//videoplaylist[@id='1']/video[@id='1']/@referid") == null ? "" : response.selectSingleNode("//videoplaylist[@id='1']/video[@id='1']/@referid").getText();
@@ -883,7 +912,10 @@ final class Presentation {
 	 * @return true if everything went ok, otherwise false
 	 */
 	private boolean loadVideo() {
-		String data = LazyHomer.sendRequestBart("GET", videoUri, null, null);
+		ServiceInterface smithers = ServiceManager.getService("smithers");
+		if (smithers==null) return false;
+		//String data = LazyHomer.sendRequestBart("GET", videoUri, null, null);
+		String data = smithers.get(videoUri, null, null);
 		try {
 			Document response = DocumentHelper.parseText(data);
 			String imageUri = response.selectSingleNode("//screens[@id='1']/properties/uri") == null ? "" : response.selectSingleNode("//screens[@id='1']/properties/uri").getText();
