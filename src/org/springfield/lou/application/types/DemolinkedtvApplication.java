@@ -889,8 +889,7 @@ final class Presentation {
 	private boolean loadPresentation() {
 		ServiceInterface smithers = ServiceManager.getService("smithers");
 		if (smithers==null) return false;
-		//String data = LazyHomer.sendRequestBart("GET", presentationUri, null, null);
-		String data = smithers.get(presentationUri, null, null);
+		String data = smithers.get(presentationUri, "<fsxml><properties><depth>2</depth></properties></fsxml>", "text/xml");
 		try {
 			Document response = DocumentHelper.parseText(data);
 			String videoUri = response.selectSingleNode("//videoplaylist[@id='1']/video[@id='1']/@referid") == null ? "" : response.selectSingleNode("//videoplaylist[@id='1']/video[@id='1']/@referid").getText();
